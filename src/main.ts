@@ -1,20 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS configuration
-  app.enableCors({
-    origin: '*', // This allows all domains, you may want to restrict this in production
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true, // Set to true if the server needs to handle cookies and authentication headers
-  });
+  // Global validation pipe to automatically validate DTOs and entities
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,            // Automatically removes properties that are not in the DTO
+    forbidNonWhitelisted: true, // Throws an error if non-whitelisted properties are passed
+    transform: true,            // Automatically transforms payloads to DTO instances
+  }));
+
+  // Enabling CORS for cross-origin requests (optional, depends on your needs)
+  app.enableCors();
+
+  // Setting the global prefix for the API (optional)
+  app.setGlobalPrefix('api');
 
   // Start the server
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`Server is running on http://localhost:${port}`);
+  await app.listen(3000, () => {
+    console.log('Application is running on: http://localhost:3000');
+  });
 }
 
 bootstrap();

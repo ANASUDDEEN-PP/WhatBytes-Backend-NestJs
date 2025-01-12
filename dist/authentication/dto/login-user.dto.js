@@ -15,13 +15,13 @@ class LoginDto {
 }
 exports.LoginDto = LoginDto;
 __decorate([
-    (0, class_validator_1.IsEmail)(),
-    (0, class_validator_1.Length)(5, 50),
+    (0, class_validator_1.IsEmail)({}, { message: "Invalid email format." }),
+    (0, class_validator_1.Length)(5, 50, { message: "Email must be between 5 and 50 characters." }),
     __metadata("design:type", String)
 ], LoginDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(6, 50),
+    (0, class_validator_1.IsString)({ message: "Password must be a string." }),
+    (0, class_validator_1.Length)(6, 50, { message: "Password must be between 6 and 50 characters." }),
     __metadata("design:type", String)
 ], LoginDto.prototype, "password", void 0);
 //# sourceMappingURL=login-user.dto.js.map

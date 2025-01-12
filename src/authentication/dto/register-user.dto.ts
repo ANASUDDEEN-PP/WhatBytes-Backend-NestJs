@@ -1,15 +1,15 @@
-import { IsString, Length, IsEmail } from "class-validator";
+import { IsEmail, IsString, Length } from 'class-validator';
 
-export class RegisterUserDto {
-    @IsString()
-    @Length(5, 50) // Adjusted to allow more flexibility for name length
-    name: string;
+export class RegisterDto {
+  @IsString({ message: 'Name must be a string.' })
+  @Length(5, 50, { message: 'Name must be between 5 and 50 characters.' })
+  name: string;
 
-    @IsEmail() // Added for stricter email validation
-    @Length(5, 50) // Adjusted length for real-world email ranges
-    email: string;
+  @IsEmail({}, { message: 'Invalid email format.' })
+  @Length(5, 50, { message: 'Email must be between 5 and 50 characters.' })
+  email: string;
 
-    @IsString()
-    @Length(6, 50) // Adjusted length for stronger password support
-    password: string;
+  @IsString({ message: 'Password must be a string.' })
+  @Length(6, 50, { message: 'Password must be between 6 and 50 characters.' })
+  password: string;
 }

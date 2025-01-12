@@ -1,15 +1,9 @@
-import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
+import { Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(context: ExecutionContext) {
-    return super.canActivate(context);
-  }
-
-  handleRequest(err, user, info) {
-    if (err || !user) {
-      throw err || new UnauthorizedException();
-    }
-    return user;
-  }
-}
+/**
+ * JwtAuthGuard protects routes that require JWT-based authentication.
+ * It leverages the 'jwt' strategy defined in the AuthModule.
+ */
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {}

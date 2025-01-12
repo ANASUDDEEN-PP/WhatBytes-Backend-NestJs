@@ -1,55 +1,43 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DB_URL") // Ensure this is correctly set in your .env file
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
+// User model
 model User {
-  id            String   @id @default(uuid()) // UUID type for id
-  name          String
-  email         String   @unique
-  password      String   @db.VarChar(100)
-  createdAt     DateTime @default(now())
-  projects      Project[]  // Reverse relation to Project (One-to-many)
-  tasksAssigned Task[]     // Reverse relation to Task (One-to-many)
+  id       String    @id @default(cuid())
+  name     String
+  email    String    @unique
+  password String
+  projects Project[] @relation("UserProjects") // Projects associated with the user
+  tasks    Task[]    @relation("UserTasks")    // Tasks assigned to the user
 }
 
+// Project model
 model Project {
-  id          String   @id @default(uuid())  // UUID type for id
+  id          String   @id @default(cuid())
   name        String
   description String
-  status      ProjectStatus
+  status      String
   createdAt   DateTime @default(now())
-  userId      String   // UUID type for userId
-  user        User     @relation(fields: [userId], references: [id])
-  tasks       Task[]   // Reverse relation to Task (One-to-many)
-
   updatedAt   DateTime @updatedAt
+  user        User     @relation("UserProjects", fields: [userId], references: [id])
+  userId      String
+  tasks       Task[]
 }
 
+// Task model
 model Task {
-  id             String      @id @default(uuid())  // UUID type for id
+  id             String  @id @default(cuid())
   title          String
   description    String
-  status         TaskStatus
-  createdAt      DateTime    @default(now())
-  projectId      String      // UUID type for projectId
-  project        Project     @relation(fields: [projectId], references: [id])
-  assignedUserId String      // UUID type for assignedUserId
-  assignedUser   User        @relation(fields: [assignedUserId], references: [id])
-}
-
-enum ProjectStatus {
-  PLANNED
-  ONGOING
-  COMPLETED
-}
-
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  DONE
+  status         String
+  project        Project @relation(fields: [projectId], references: [id])
+  projectId      String
+  assignedUser   User?   @relation("UserTasks", fields: [assignedUserId], references: [id])
+  assignedUserId String?
 }

@@ -11,51 +11,50 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_1 = require("@nestjs/jwt");
-const prisma_service_1 = require("../prisma.service");
 const users_service_1 = require("../users/users.service");
+const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcrypt");
-const users_model_1 = require("../users/users.model");
 let AuthService = class AuthService {
-    constructor(prismaService, jwtService, userService) {
-        this.prismaService = prismaService;
+    constructor(usersService, jwtService) {
+        this.usersService = usersService;
         this.jwtService = jwtService;
-        this.userService = userService;
+    }
+    async register(registerDto) {
+        const { email, password, name } = registerDto;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await this.usersService.create({
+            email,
+            password: hashedPassword,
+            name,
+        });
+        const payload = { username: newUser.name, sub: newUser.id };
+        return {
+            accessToken: this.jwtService.sign(payload),
+        };
     }
     async login(loginDto) {
         const { email, password } = loginDto;
-        const user = await this.prismaService.user.findUnique({
-            where: { email },
-        });
+        const user = await this.usersService.findByEmail(email);
         if (!user) {
-            throw new common_1.NotFoundException('Invalid email or password');
+            throw new Error('Invalid credentials');
         }
-        const validatePassword = await bcrypt.compare(password, user.password);
-        if (!validatePassword) {
-            throw new common_1.NotFoundException('Invalid email or password');
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new Error('Invalid credentials');
         }
+        const payload = { username: user.name, sub: user.id };
         return {
-            token: this.jwtService.sign({ email }),
+            accessToken: this.jwtService.sign(payload),
         };
     }
-    async register(createDto) {
-        const createUser = new users_model_1.Users();
-        createUser.name = createDto.name;
-        createUser.email = createDto.email;
-        createUser.password = await bcrypt.hash(createDto.password, 10);
-        const user = await this.userService.createUser(createUser);
-        return {
-            token: this.jwtService.sign({
-                email: user.email,
-            }),
-        };
+    async validateUser(payload) {
+        return { userId: payload.sub, username: payload.username };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        jwt_1.JwtService,
-        users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

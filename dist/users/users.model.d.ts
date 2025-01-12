@@ -1,7 +1,13 @@
-import { Prisma } from '@prisma/client';
-export declare class Users implements Prisma.UserCreateInput {
+import { Project } from '../projects/models/project.model';
+import { Task } from '../projects/models/task.model';
+export declare class User {
+    id: string;
     name: string;
     email: string;
-    createdAt?: Date;
     password: string;
+    createdAt: Date;
+    updatedAt: Date;
+    projects: Project[];
+    tasks: Task[];
+    hashPassword(): Promise<void>;
 }

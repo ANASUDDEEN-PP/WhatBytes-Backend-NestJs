@@ -9,24 +9,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterUserDto = void 0;
+exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
-class RegisterUserDto {
+class RegisterDto {
 }
-exports.RegisterUserDto = RegisterUserDto;
+exports.RegisterDto = RegisterDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(5, 50),
+    (0, class_validator_1.IsString)({ message: 'Name must be a string.' }),
+    (0, class_validator_1.Length)(5, 50, { message: 'Name must be between 5 and 50 characters.' }),
     __metadata("design:type", String)
-], RegisterUserDto.prototype, "name", void 0);
+], RegisterDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
-    (0, class_validator_1.Length)(5, 50),
+    (0, class_validator_1.IsEmail)({}, { message: 'Invalid email format.' }),
+    (0, class_validator_1.Length)(5, 50, { message: 'Email must be between 5 and 50 characters.' }),
     __metadata("design:type", String)
-], RegisterUserDto.prototype, "email", void 0);
+], RegisterDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(6, 50),
+    (0, class_validator_1.IsString)({ message: 'Password must be a string.' }),
+    (0, class_validator_1.Length)(6, 50, { message: 'Password must be between 6 and 50 characters.' }),
     __metadata("design:type", String)
-], RegisterUserDto.prototype, "password", void 0);
+], RegisterDto.prototype, "password", void 0);
 //# sourceMappingURL=register-user.dto.js.map

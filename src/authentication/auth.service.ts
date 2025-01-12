@@ -1,51 +1,71 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { PrismaService } from "src/prisma.service"; // Corrected typo in 'PrismaServie' to 'PrismaService'
-import { UsersService } from "src/users/users.service";
-import { LoginDto } from "./dto/login-user.dto";
+import { Injectable } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login-user.dto';
+import { RegisterDto } from './dto/register-user.dto';
+import { JwtPayload } from '../authentication/interface/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from "./dto/register-user.dto";
-import { Users } from "src/users/users.model";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prismaService: PrismaService, // Corrected 'PrismaServie' to 'PrismaService'
-    private readonly jwtService: JwtService, // Corrected variable name to follow proper naming conventions
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<any> {
-    const { email, password } = loginDto;
-    const user = await this.prismaService.user.findUnique({
-      where: { email },
+  /**
+   * Registers a new user
+   * @param registerDto - User registration data
+   * @returns JWT token
+   */
+  async register(registerDto: RegisterDto): Promise<{ accessToken: string }> {
+    const { email, password, name } = registerDto;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await this.usersService.create({
+      email,
+      password: hashedPassword,
+      name,
     });
-    if (!user) {
-      throw new NotFoundException('Invalid email or password');
-    }
 
-    const validatePassword = await bcrypt.compare(password, user.password);
-    if (!validatePassword) {
-      throw new NotFoundException('Invalid email or password');
-    }
+    const payload: JwtPayload = { username: newUser.name, sub: newUser.id };
 
     return {
-      token: this.jwtService.sign({ email }),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
-  async register(createDto: RegisterUserDto): Promise<any> {
-    const createUser = new Users();
-    createUser.name = createDto.name;
-    createUser.email = createDto.email;
-    createUser.password = await bcrypt.hash(createDto.password, 10);
+  /**
+   * Logs in an existing user
+   * @param loginDto - User login data
+   * @returns JWT token
+   */
+  async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
+    const { email, password } = loginDto;
+    const user = await this.usersService.findByEmail(email);
 
-    const user = await this.userService.createUser(createUser);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+
+    const payload: JwtPayload = { username: user.name, sub: user.id };
 
     return {
-      token: this.jwtService.sign({
-        email: user.email,
-      }),
+      accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  /**
+   * Validates a user based on the JWT payload
+   * @param payload - JWT payload containing user information
+   * @returns User information
+   */
+  async validateUser(payload: JwtPayload): Promise<any> {
+    return { userId: payload.sub, username: payload.username };
   }
 }

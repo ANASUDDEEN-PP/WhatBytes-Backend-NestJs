@@ -1,6 +1,6 @@
-import { INestApplication, OnModuleInit } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
-export declare class PrismaService extends PrismaClient implements OnModuleInit {
-    onModuleInit(): Promise<void>;
-    enableShutdownHooks(app: INestApplication): Promise<void>;
+import { PrismaClient } from '@prisma/client';
+export declare class PrismaService extends PrismaClient {
+    constructor();
+    onModuleDestroy(): Promise<void>;
+    $on(event: string, callback: (...args: any[]) => void): void;
 }
